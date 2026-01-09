@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+   <link rel="stylesheet" type="text/css" href="style.css">
+    <title>AgilStore</title>
+</head>
+<body>
+    <h1>Welcome to AgilStore</h1>
+
+    <!-- Registration form: only product creation (all fields required) -->
+    <form action="/add-product" class="formulario" method="POST">
+        <input type="text" name="productName" placeholder="Product Name" class="input-bordas" required>
+        <input type="text" name="productCategory" placeholder="Product Category" class="input-bordas" required>
+        <input type="number" name="productPrice" placeholder="Product Price" class="input-bordas" required>
+        <input type="number" name="productStock" placeholder="Product Stock" class="input-bordas" required>
+        <button type="submit" class="button-form borda-inversa">Add Product</button>
+    </form>
+
+    <!-- Separate search input (optional) -->
+    <div style="max-width:500px;margin:20px auto; text-align:center;">
+        <input type="text" id="searchInput" placeholder="Buscar por nome ou categoria" class="input-bordas">
+        <button type="button" onclick="searchProduct()" class="button-form borda-inversa">Buscar</button>
+    </div>
+
+    <h2>Produtos em Estoque</h2>
+
+    <table border="1" width="100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Quantidade</th>
+                <th>Preço</th>
+            </tr>
+        </thead>
+        <tbody id="product-list"></tbody>
+    </table>
+
+<script>
+    function renderProducts(products) {
+        const table = document.getElementById("product-list");
+        table.innerHTML = '';
+
+        if (!products || products.length === 0) {
+            table.innerHTML = '<tr><td colspan="5">Nenhum produto encontrado</td></tr>';
+            return;
+        }
+
+        products.forEach(product => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${product.id}</td>
+                <td>${product.name}</td>
+                <td>${product.category}</td>
+                <td>${product.stock}</td>
+                <td>R$ ${product.price}</td>
+            `;
+
+            table.appendChild(row);
+        });
+    }
+
+    // Load all products on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch('/products')
+            .then(response => response.json())
+            .then(renderProducts)
+            .catch(() => renderProducts([]));
+    });
+
+    // Search handler (optional field)
+    function searchProduct() {
+        const query = document.getElementById('searchInput').value;
+        fetch(`/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(renderProducts)
+            .catch(() => renderProducts([]));
+    }
+</script>
+</body>
+</html>

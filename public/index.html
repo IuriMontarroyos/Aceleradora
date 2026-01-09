@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+   <link rel="stylesheet" type="text/css" href="style.css">
+    <title>AgilStore</title>
+</head>
+<body>
+    <h1>Welcome to AgilStore</h1>
+
+    <!-- Registration form: only product creation (all fields required) -->
+    <form action="/add-product" class="formulario" method="POST">
+        <input type="text" name="productName" placeholder="Product Name" class="input-bordas" required>
+        <input type="text" name="productCategory" placeholder="Product Category" class="input-bordas" required>
+        <input type="number" name="productPrice" placeholder="Product Price" class="input-bordas" required>
+        <input type="number" name="productStock" placeholder="Product Stock" class="input-bordas" required>
+        <button type="submit" class="button-form borda-inversa">Add Product</button>
+    </form>
+
+    <!-- Filters -->
+    <div style="max-width:700px;margin:20px auto; text-align:center; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+        <input type="text" id="searchInput" placeholder="Buscar por nome ou categoria" class="input-bordas" style="max-width:200px">
+        <input type="text" id="categoryInput" placeholder="Categoria (exata)" class="input-bordas" style="max-width:150px">
+        <input type="number" id="minPrice" placeholder="Min Price" class="input-bordas" style="max-width:120px">
+        <input type="number" id="maxPrice" placeholder="Max Price" class="input-bordas" style="max-width:120px">
+        <select id="sortSelect" class="input-bordas" style="max-width:130px">
+            <option value="">Ordenar</option>
+            <option value="name">Nome ↑</option>
+            <option value="-name">Nome ↓</option>
+            <option value="price">Preço ↑</option>
+            <option value="-price">Preço ↓</option>
+            <option value="id">ID ↑</option>
+            <option value="-id">ID ↓</option>
+        </select>
+        <select id="limitSelect" class="input-bordas" style="max-width:90px">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+        </select>
+        <button type="button" id="searchBtn" class="button-form borda-inversa">Buscar</button>
+    </div>
+
+    <div id="meta" style="max-width:700px;margin:0 auto 10px;text-align:center;"></div>
+
+    <h2>Produtos em Estoque</h2>
+
+    <table border="1" width="100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Quantidade</th>
+                <th>Preço</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="product-list"></tbody>
+    </table>
+
+    <div style="max-width:700px;margin:10px auto; text-align:center;">
+        <button id="prevBtn" class="button-form borda-inversa">Anterior</button>
+        <span id="pageInfo">Página 1</span>
+        <button id="nextBtn" class="button-form borda-inversa">Próxima</button>
+    </div>
+
+<script>
+    let state = { page: 1, limit: 10, totalPages: 1 };
+
+    function renderProducts(products) {
+        const table = document.getElementById("product-list");
+        table.innerHTML = '';
+
+        if (!products || products.length === 0) {
+            table.innerHTML = '<tr><td colspan="5">Nenhum produto encontrado</td></tr>';
+            return;
+        }
+
+        products.forEach(product => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${product.id}</td>
+                <td>${product.name}</td>
+                <td>${product.category}</td>
+                <td>${product.stock}</td>
+                <td>R$ ${product.price}</td>
+                <td>
+                    <button class="button-form borda-inversa" onclick="onDelete(${product.id})">Excluir</button>
+                </td>
+            `;
+
+            table.appendChild(row);
+        });
+    }
+
+    function onDelete(id) {
+        if (!confirm('Deseja realmente excluir este produto?')) return;
+
+        fetch('/delete-product', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ id })
+        })
+        .then(res => {
+            if (!res.ok) return res.json().then(err => { throw err; });
+            return res.json();
+        })
+        .then(() => fetchProducts(state.page))
+        .catch(err => {
+            alert(err && err.error ? err.error : 'Erro ao excluir');
+            console.error(err);
+        });
+    }
+
+    function updateMeta(meta) {
+        const el = document.getElementById('meta');
+        el.textContent = `Total: ${meta.total} — Página ${meta.page} / ${meta.totalPages} — Exibindo ${meta.dataLength} itens`;
+        state.page = meta.page;
+        state.limit = meta.limit;
+        state.totalPages = meta.totalPages;
+        document.getElementById('pageInfo').textContent = `Página ${state.page} / ${state.totalPages}`;
+        document.getElementById('prevBtn').disabled = state.page <= 1;
+        document.getElementById('nextBtn').disabled = state.page >= state.totalPages;
+    }
+
+    async function fetchProducts(page = 1) {
+        const q = document.getElementById('searchInput').value;
+        const category = document.getElementById('categoryInput').value;
+        const minPrice = document.getElementById('minPrice').value;
+        const maxPrice = document.getElementById('maxPrice').value;
+        const sort = document.getElementById('sortSelect').value;
+        const limit = document.getElementById('limitSelect').value || 10;
+
+        const params = new URLSearchParams();
+        if (q) params.append('q', q);
+        if (category) params.append('category', category);
+        if (minPrice) params.append('minPrice', minPrice);
+        if (maxPrice) params.append('maxPrice', maxPrice);
+        if (sort) params.append('sort', sort);
+        if (limit) params.append('limit', limit);
+        params.append('page', page);
+
+        try {
+            const res = await fetch(`/products?${params.toString()}`);
+            if (!res.ok) throw new Error('Failed to fetch');
+            const json = await res.json();
+            renderProducts(json.data);
+            updateMeta({ total: json.meta.total, page: json.meta.page, totalPages: json.meta.totalPages, limit: json.meta.limit, dataLength: json.data.length });
+        } catch (err) {
+            renderProducts([]);
+            document.getElementById('meta').textContent = 'Erro ao carregar produtos';
+            console.error(err);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchProducts();
+
+        document.getElementById('searchBtn').addEventListener('click', () => fetchProducts(1));
+        document.getElementById('prevBtn').addEventListener('click', () => fetchProducts(Math.max(1, state.page - 1)));
+        document.getElementById('nextBtn').addEventListener('click', () => fetchProducts(Math.min(state.totalPages, state.page + 1)));
+        document.getElementById('limitSelect').addEventListener('change', () => fetchProducts(1));
+        document.getElementById('sortSelect').addEventListener('change', () => fetchProducts(1));
+    });
+</script>
+</body>
+</html>
