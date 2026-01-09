@@ -1,79 +1,37 @@
-AgilStore – Sistema de Gerenciamento de Inventário
+AgilStore — Gerenciamento de Estoque
+Visão Geral
 
-Aplicação desenvolvida em Node.js com Express para gerenciamento automatizado de inventário de produtos de uma loja de eletrônicos.
-O sistema substitui o controle manual em planilhas, permitindo cadastro, consulta, atualização, exclusão e persistência de dados de forma simples e organizada.
+O AgilStore é uma aplicação web desenvolvida como parte de um desafio técnico, com o objetivo de automatizar o controle de estoque de uma loja de eletrônicos.
 
-Funcionalidades
-1. Adicionar Produto
+A aplicação foi criada para substituir o controle manual, permitindo o gerenciamento de produtos de forma simples e organizada, com foco em clareza de código, funcionamento correto e facilidade de manutenção.
 
-Permite cadastrar novos produtos no inventário informando:
+Funcionalidades Implementadas
 
-Nome do produto
+Cadastro de produtos com ID único gerado automaticamente
 
-Categoria
+Listagem de todos os produtos cadastrados
 
-Quantidade em estoque
+Busca de produtos por ID, nome ou categoria
 
-Preço
+Atualização das informações de um produto existente
 
-Cada produto recebe automaticamente um ID único, gerado pelo sistema.
+Remoção de produtos do estoque
 
-2. Listar Produtos
+Persistência de dados em arquivo JSON
 
-Exibe todos os produtos cadastrados em uma tabela contendo:
+Decisões de Desenvolvimento
 
-ID
+Uso de Node.js com Express para criação do servidor e das rotas
 
-Nome
+Persistência simples em arquivo JSON, garantindo que os dados sejam mantidos entre execuções
 
-Categoria
+Organização do projeto em arquivos separados para facilitar leitura e entendimento
 
-Quantidade em estoque
-
-Preço
-
-Os dados são carregados automaticamente ao abrir a aplicação.
-
-3. Buscar Produto
-
-Permite buscar produtos:
-
-Pelo ID
-
-Por parte do nome
-
-Pela categoria
-
-Caso nenhum produto seja encontrado, o sistema exibe uma mensagem informativa.
-
-4. Atualizar Produto
-
-Permite atualizar um produto existente a partir do seu ID:
-
-Nome
-
-Categoria
-
-Quantidade
-
-Preço
-
-O sistema valida a existência do ID antes de aplicar as alterações.
-
-5. Excluir Produto
-
-Remove um produto do inventário pelo ID informado.
-O sistema valida se o produto existe antes da exclusão.
-
-6. Persistência de Dados
-
-Os dados do inventário são armazenados em um arquivo JSON (products.json), garantindo que as informações não sejam perdidas ao encerrar a aplicação.
+Validação básica dos dados antes de salvar alterações no estoque
 
 Tecnologias Utilizadas
 
-JavaScript (ES Modules)
-
-Node.js
+JavaScript (Node.js)
 
 Express.js
 
@@ -81,13 +39,8 @@ HTML5
 
 CSS3
 
-Armazenamento em arquivo JSON
-
-Fetch API (para comunicação frontend ↔ backend)
-
 Estrutura do Projeto
 agilstore/
-│
 ├── app.js
 ├── products.js
 ├── data/
@@ -97,50 +50,15 @@ agilstore/
 │   └── style.css
 └── README.md
 
-Como Executar o Projeto Localmente
-Pré-requisitos
-
-Node.js instalado (versão 18 ou superior recomendada)
-
-Passo a passo
-
-Clone o repositório:
-
-git clone https://github.com/IuriMontarroyos/Aceleradora/tree/master
-
-
-Instale as dependências:
-
+Como Executar
 npm install
-
-
-Inicie o servidor:
-
 node app.js
 
 
-Acesse no navegador:
+A aplicação ficará disponível em:
 
 http://localhost:3000
 
-Observações Técnicas
+Considerações Finais
 
-O sistema utiliza Express com rotas REST simples.
-
-A lógica de geração de IDs é controlada na classe Products, garantindo unicidade mesmo após recarregar dados do JSON.
-
-A separação entre frontend e backend foi mantida para facilitar manutenção e evolução do projeto.
-
-A aplicação foi desenvolvida priorizando clareza de código e aderência aos requisitos funcionais do desafio.
-
-Possíveis Evoluções
-
-Filtros e ordenações por preço, quantidade ou categoria
-
-Confirmação visual para exclusão de produtos
-
-Interface para edição direta via modal
-
-Migração da persistência para banco de dados
-
-Implementação de testes automatizados
+Este projeto foi desenvolvido seguindo os requisitos do desafio, priorizando simplicidade, organização e funcionamento correto das funcionalidades propostas.
